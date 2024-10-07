@@ -1,29 +1,27 @@
 package com.rupak.service;
 
-import com.rupak.annotations.Component;
-import lombok.Data;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.rupak.annotation.Autowired;
+import com.rupak.annotation.Component;
+import com.rupak.models.Product;
+import com.rupak.repository.ProductRepository;
 import java.util.UUID;
 
 @Component
-@Data
 public class ProductService {
 
-    private Map<String, String> map;
+    @Autowired
+    private ProductRepository productRepository;
 
-    public ProductService() {
-        map = new HashMap<>();
+    public String addProduct(Product product) {
+        String id = UUID.randomUUID().toString();
+        product.setId(id);
+        boolean success = productRepository.addProduct(product);
+        if(success) return id;
+        return "";
     }
 
-    public String addProduct(String name) {
-        String productId = UUID.randomUUID().toString();
-        map.put(productId, name);
-        return productId;
-    }
-
-    public String getProduct(String productId) {
-        return map.getOrDefault(productId, null);
+    public Product getProduct(String id) {
+        if(id == null) return null;
+        return productRepository.getProduct(id);
     }
 }

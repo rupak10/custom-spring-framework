@@ -1,24 +1,31 @@
 package com.rupak.controller;
 
-import com.rupak.annotations.Autowired;
-import com.rupak.annotations.RestController;
+import com.rupak.annotation.Autowired;
+import com.rupak.annotation.Component;
+import com.rupak.models.Product;
+import com.rupak.models.dto.AddProductRequest;
+import com.rupak.models.dto.AddProductResponse;
 import com.rupak.service.ProductService;
-import lombok.Getter;
-import lombok.Setter;
 
-@RestController
-@Getter
-@Setter
+@Component
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-    public String addProduct(String name) {
-        return productService.addProduct(name);
+    public AddProductResponse addProduct(AddProductRequest request) {
+        Product product = new Product();
+        product.setName(request.getName());
+
+        String id = productService.addProduct(product);
+
+        AddProductResponse addProductResponse = new AddProductResponse();
+        addProductResponse.setId(id);
+
+        return addProductResponse;
     }
 
-    public String getProduct(String productId) {
-        return productService.getProduct(productId);
+    public Product getProduct(String id) {
+        return productService.getProduct(id);
     }
 }
