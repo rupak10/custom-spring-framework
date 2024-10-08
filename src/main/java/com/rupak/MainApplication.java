@@ -16,11 +16,11 @@ public class MainApplication {
 
         ApplicationContext applicationContext = LiteSpringApplication.run(MainApplication.class);
 
-        ProductController productController = (ProductController) applicationContext.getBean(ProductController.class);
+       /* ProductController productController = (ProductController) applicationContext.getBean(ProductController.class);
         AddProductResponse addProductResponse = productController.addProduct(new AddProductRequest("Iphone"));
         System.out.println("addProductResponse = " + addProductResponse);
 
         Product product = productController.getProduct(addProductResponse.getId());
-        System.out.println("product = " + product);
+        System.out.println("product = " + product);*/
     }
 }
