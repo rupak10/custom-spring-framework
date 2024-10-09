@@ -18,7 +18,7 @@ public class SearchService {
 
         List<Product> products = productService.getAllProducts();
         for(Product product : products) {
-            if(product.getName().toLowerCase().contains(name)) filterProducts.add(product);
+            if(product.getName().toLowerCase().contains(name.toLowerCase())) filterProducts.add(product);
         }
         return filterProducts;
     }

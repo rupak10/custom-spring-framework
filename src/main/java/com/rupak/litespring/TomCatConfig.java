@@ -169,8 +169,12 @@ public class TomCatConfig {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
 
+        System.out.println("request uri : "+req.getRequestURI());
+        System.out.println("context path : "+req.getContextPath());
+
         String path = req.getRequestURI().replace(req.getContextPath(), "");
         System.out.println("path : "+path);
+        System.out.println("urlMapping : "+urlMapping);
         String[] urlParts = urlMapping.split("/");
         String[] pathParts = path.split("/");
 
@@ -195,10 +199,11 @@ public class TomCatConfig {
         return args;
     }
 
-  /*  private static String extractPathVariable(String varName, String[] urlParts, String[] pathParts) {
+ /*   private static String extractPathVariable(String varName, String[] urlParts, String[] pathParts) {
         // Logic to map the path variable from the URL pattern to the actual path
         for (int j = 0; j < urlParts.length; j++) {
             if (urlParts[j].equals("{" + varName + "}")) {
+                System.out.println("last path part : "+pathParts[j]);
                 return pathParts[j];
             }
         }

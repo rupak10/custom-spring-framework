@@ -46,9 +46,19 @@ public class ProductController {
         return productService.getProduct(id);
     }
 
-    @GetMapping("/api/products/{id}")
+   /* @GetMapping("/api/products/{id}")
     @ResponseBody
     public SearchResponse search(@RequestParam("query") String query) {
+        List<Product> productList = searchService.search(query);
+        SearchResponse searchResponse = new SearchResponse();
+        searchResponse.setProducts(productList);
+        return searchResponse;
+    }*/
+
+    @GetMapping("/api/products/search")
+    @ResponseBody
+    public SearchResponse search(@RequestParam("query") String query) {
+        System.out.println("query : "+query);
         List<Product> productList = searchService.search(query);
         SearchResponse searchResponse = new SearchResponse();
         searchResponse.setProducts(productList);

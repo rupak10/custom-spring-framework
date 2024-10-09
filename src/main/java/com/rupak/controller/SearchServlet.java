@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@Servlet(urlMapping = "/api/products/search")
+@Servlet(urlMapping = "/api/products/srv/search")
 public class SearchServlet extends HttpServlet {
 
     @Autowired
