@@ -43,10 +43,13 @@ public class ApplicationContext {
         }
     }
 
+    /**
+     * create all the objects based on the annotation
+     */
     private void createBeans(List<Class<?>> classList) throws Exception {
         for(Class<?> clazz : classList) {
             //System.out.println("class name : "+clazz);
-            if(clazz.isAnnotationPresent(Component.class) || clazz.isAnnotationPresent(Servlet.class)) {
+            if(clazz.isAnnotationPresent(Component.class) || clazz.isAnnotationPresent(Servlet.class) || clazz.isAnnotationPresent(RestController.class)) {
                 Object object = clazz.getDeclaredConstructor().newInstance();
                 beanFactory.put(clazz.getSimpleName(), object);
             }
@@ -55,23 +58,25 @@ public class ApplicationContext {
 
     protected void registerServlets(List<Class<?>> classes) throws Exception {
         for (Class<?> clazz : classes) {
-            if(clazz.isAnnotationPresent(Servlet.class) || clazz.isAnnotationPresent(RestController.class)) {
+            if(clazz.isAnnotationPresent(Servlet.class)) {
                 Servlet servlet = clazz.getAnnotation(Servlet.class);
                 Object instance = beanFactory.get(clazz.getSimpleName());
                 if(clazz.isAnnotationPresent(Servlet.class)) {
                     tomCatConfig.registerServlet(instance, clazz.getSimpleName(), servlet.urlMapping());
                 }
-                else if(clazz.isAnnotationPresent(RestController.class)) {
-                    tomCatConfig.registerServlet(clazz, servlet.urlMapping());
-                }
-
+            }
+            else if(clazz.isAnnotationPresent(RestController.class)) {
+                tomCatConfig.registerController(clazz, beanFactory.get(clazz.getSimpleName()));
             }
         }
     }
 
+    /**
+     * resolve object dependencies for each object
+     */
     private void injectDependencies(List<Class<?>> classList) throws IllegalAccessException {
         for(Class<?> clazz : classList) {
-            if(clazz.isAnnotationPresent(Component.class) || clazz.isAnnotationPresent(Servlet.class)) {
+            if(clazz.isAnnotationPresent(Component.class) || clazz.isAnnotationPresent(Servlet.class) || clazz.isAnnotationPresent(RestController.class)) {
                 Object parentObject = beanFactory.get(clazz.getSimpleName());
                 Field[] fields = clazz.getDeclaredFields();
                 for(Field field : fields) {

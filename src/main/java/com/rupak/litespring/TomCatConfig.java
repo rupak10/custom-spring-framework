@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 
 public class TomCatConfig {
     private static Tomcat tomcat;
@@ -49,10 +50,7 @@ public class TomCatConfig {
         context.addServletMappingDecoded(urlMapping, className);
     }
 
-
-
-
-    protected static void registerServlet(Class<?> clazz, String urlMapping) throws Exception {
+   /* protected static void registerServlet(Class<?> clazz, String urlMapping) throws Exception {
         if (clazz.isAnnotationPresent(RestController.class)) {
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(ResponseBody.class)) {
@@ -72,11 +70,53 @@ public class TomCatConfig {
                 }
             }
         }
+    }*/
+
+    protected void registerController(Class<?> clazz, Object controllerObject) throws Exception {
+        if (clazz.isAnnotationPresent(RestController.class)) {
+            for (Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(ResponseBody.class)) {
+                    // Register a controller's method as a servlet for URL mapping
+                    //Tomcat tomcat = new Tomcat();
+                    String servletName = clazz.getSimpleName() + method.getName();
+                    if(method.isAnnotationPresent(PostMapping.class)) {
+                        String urlMapping = method.getAnnotation(PostMapping.class).value();
+                        tomcat.addServlet(contextPath, servletName, new HttpServlet() {
+                            @Override
+                            protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                                try {
+                                    handleControllerPostRequest(req, resp, clazz, method, controllerObject);
+                                } catch (Exception e) {
+                                    throw new IOException(e);
+                                }
+                            }
+                        });
+                        context.addServletMappingDecoded(urlMapping, servletName);
+                    }
+                    else if(method.isAnnotationPresent(GetMapping.class)) {
+                        System.out.println("get mapping found : "+method.getName());
+                        String urlMapping = method.getAnnotation(GetMapping.class).value();
+                        System.out.println("urlMapping : "+urlMapping);
+                        tomcat.addServlet(contextPath, servletName, new HttpServlet() {
+                            @Override
+                            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                                try {
+                                    handleControllerGetRequest(req, resp, clazz, method, urlMapping, controllerObject);
+                                } catch (Exception e) {
+                                    throw new IOException(e);
+                                }
+                            }
+                        });
+                        context.addServletMappingDecoded(urlMapping, servletName);
+                    }
+                }
+            }
+        }
     }
 
-    private static void handleControllerPostRequest(HttpServletRequest req, HttpServletResponse resp, Class<?> clazz, Method method) throws Exception {
+    private static void handleControllerPostRequest(HttpServletRequest req, HttpServletResponse resp, Class<?> clazz, Method method, Object controllerObject) throws Exception {
         // TODO
-        Object controller = null;
+       // Object controller = null;
 
 
         // Extract @RequestBody parameter
@@ -90,7 +130,7 @@ public class TomCatConfig {
         }
 
         // Call the method with @RequestBody parameter
-        Object returnValue = method.invoke(controller, requestBody);
+        Object returnValue = method.invoke(controllerObject, requestBody);
 
         // Convert return object to JSON and write to the response if @ResponseBody is present
         if (method.isAnnotationPresent(ResponseBody.class)) {
@@ -105,16 +145,16 @@ public class TomCatConfig {
 
     private static void handleControllerGetRequest(
             HttpServletRequest req, HttpServletResponse resp, Class<?> clazz,
-            Method method, String urlMapping) throws Exception {
+            Method method, String urlMapping, Object controllerObject) throws Exception {
         // TODO
-        Object controller = null;
+        //Object controller = null;
 
 
         // Extract path variables and request params
         Object[] args = resolveMethodArguments(req, method, urlMapping);
 
         // Call the method
-        Object returnValue = method.invoke(controller, args);
+        Object returnValue = method.invoke(controllerObject, args);
 
         // Convert the return object to JSON and send the response if annotated with @ResponseBody
         if (method.isAnnotationPresent(ResponseBody.class)) {
@@ -130,6 +170,7 @@ public class TomCatConfig {
         Object[] args = new Object[parameters.length];
 
         String path = req.getRequestURI().replace(req.getContextPath(), "");
+        System.out.println("path : "+path);
         String[] urlParts = urlMapping.split("/");
         String[] pathParts = path.split("/");
 
@@ -150,10 +191,11 @@ public class TomCatConfig {
                 args[i] = req.getParameter(paramName);
             }
         }
+        System.out.println("Arrays.toString(args) = " + Arrays.toString(args));
         return args;
     }
 
-    private static String extractPathVariable(String varName, String[] urlParts, String[] pathParts) {
+  /*  private static String extractPathVariable(String varName, String[] urlParts, String[] pathParts) {
         // Logic to map the path variable from the URL pattern to the actual path
         for (int j = 0; j < urlParts.length; j++) {
             if (urlParts[j].equals("{" + varName + "}")) {
@@ -161,5 +203,9 @@ public class TomCatConfig {
             }
         }
         return null;
+    }*/
+
+    private static String extractPathVariable(String varName, String[] urlParts, String[] pathParts) {
+        return pathParts[pathParts.length - 1];
     }
 }

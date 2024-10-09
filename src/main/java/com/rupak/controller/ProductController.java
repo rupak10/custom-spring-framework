@@ -34,7 +34,13 @@ public class ProductController {
         return addProductResponse;
     }
 
-    @GetMapping("/api/products/{id}")
+  /*  @GetMapping("/api/products/{id}")
+    @ResponseBody
+    public Product getProduct(@PathVariable("id") String id) {
+        return productService.getProduct(id);
+    }*/
+
+    @GetMapping("/api/products/*")
     @ResponseBody
     public Product getProduct(@PathVariable("id") String id) {
         return productService.getProduct(id);
